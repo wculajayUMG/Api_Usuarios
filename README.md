@@ -1,4 +1,9 @@
 # Users API (REST) - Node.js + Express
+
+## CREDENCIALES
+ - Nombre: Willy Estuardo Culajay Asturias
+ - Carnet: 9490-22-3432
+ - Seccion. "B"
 ## URL de la API DESPLEGADA EN RENDER
   https://api-usuarios-2a6x.onrender.com
 ## Descripción
