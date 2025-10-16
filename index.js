@@ -1,7 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv'
+import bcrypt from 'bcryptjs';
 
+dotenv.config();
 
 const app = express();
 
@@ -14,7 +18,7 @@ app.listen(3000, ()=>{
 });
 
 app.get('/', (req, res) =>{
-    res.send('Bienvenido a mi API');
+    res.send('Api con autenticacion JWT');
 })
 
 
@@ -68,6 +72,56 @@ return tieneMayuscula && tieneNumero && tieneSimbolo;
 
 }
 
+//Middleware de verificacion de token
+const verificarToken = (req, res, next) =>{
+    const token = req.header('Authorization')?.replace('Bearer','');
+
+    if(!token){
+        return res.status(401).json({error: 'Acceso denegado. Token no proporcionado'});
+    }
+
+    try{
+        const verificado = jwt.verify(token, process.env.JWT_SECRET);
+        req.usuario = verificado;
+        next();
+
+    } catch (error){
+        
+        res.status(400).json({error: 'Token no es valido'});
+
+    }
+
+
+}
+
+//endopoint para login 
+
+app.post('/login', async (req, res) =>{
+    const {email, password} = req.body;
+
+    // Validar campos
+    if(!email || !password){
+        return res.status(400).json({error: 'Todos los campos son obligatorios'});
+    }
+
+    // Verificar si el usuario existe
+    const usuario = users.find(u => u.email === email);
+    if(!usuario){
+        return res.status(404).json({error: 'Usuario no encontrado'});
+    }
+
+    // Verificar contraseña
+    
+    if(password !== usuario.password){
+        return res.status(401).json({error: 'Contraseña incorrecta'});
+    }
+
+    // Generar token
+    const token = jwt.sign({id: usuario.dpi, email : usuario.email}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRES_IN});
+    
+    res.json({token});
+});
+
 // endpoints
 app.post('/users', (req, res) =>{
     const {dpi, nombre, email, password} = req.body;
@@ -99,7 +153,7 @@ app.post('/users', (req, res) =>{
 
 //listar usuarios
 
-app.get('/users',(req, res) =>{
+app.get('/users',verificarToken,(req, res) =>{
     let {nombre, email, limit,offset} = req.query;
     let filtrados = users;
 
@@ -128,7 +182,7 @@ app.get('/users',(req, res) =>{
 
 //actualizar usuario
 
-app.put('/users/:dpi',(req, res)=>{
+app.put('/users/:dpi',verificarToken,( req, res)=>{
     const {dpi} = req.params;
     if(!req.body){
         return res.status(400).json({error: 'No hay datos para actualizar'});       
@@ -176,7 +230,7 @@ app.put('/users/:dpi',(req, res)=>{
 });
 
 //eliminar usuario
-app.delete('/users/:dpi', (req, res) =>{
+app.delete('/users/:dpi',verificarToken, (req, res) =>{
     const {dpi} = req.params;
     const indiceUsuario = users.findIndex(u => u.dpi === dpi);
     if(indiceUsuario === -1){

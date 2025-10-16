@@ -1,28 +1,55 @@
-# Users API (REST) - Node.js + Express
+# API DE USUARIOS CON JWT
 
 ## CREDENCIALES
  - Nombre: Willy Estuardo Culajay Asturias
  - Carnet: 9490-22-3432
  - Seccion. "B"
+
 ## URL de la API DESPLEGADA EN RENDER
-  https://api-usuarios-2a6x.onrender.com
+
+
 ## Descripción
-API para gestionar usuarios (crear, listar, actualizar, eliminar) con validaciones:
-- DPI único y exactamente 13 dígitos numéricos.
-- Email único y formato válido.
-- Password mínimo 8 caracteres, 1 mayúscula, 1 número y 1 símbolo.
+API para para implentacion de autenticación mediante el uso de JSON Web Token, utilizando Node.js y Express.js 
+- al loguearse se crea un Token JWT.
+- se protegen los endpoints de la API.
+- solo los usuarios autenticados pueden acceder a las rutas indicadas
 
 ## Endpoints
+- `POST /login`— crear Token.
 - `POST /users` — crear usuario
 - `GET  /users` — listar (filtros `?name=`, `?email=`, `?limit=`, `?offset=`)
 - `PUT  /users/:dpi` — actualizar usuario por DPI
 - `DELETE /users/:dpi` — eliminar usuario por DPI
 
-## Ejecutar localmente
-1. `git clone <repo>`
-2. `npm install`
-3. `npm run dev` (desarrollo con nodemon) o `npm start` (producción)
-4. API escucha en `http://localhost:3000` (o en `process.env.PORT` si se usa PaaS)
+## Variables de Entorno
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+
+## Instalación
+1. Clonar el repositorio.
+2. Instalar dependencias npm install
+3. Crear un archivo `.env` con la variables de entorno necesarias.
+4. Ejecutar `npm run dev` (desarrollo con nodemon)
+
+#### POST/login
+ejemplo de login de usuario y generacion de Token.
+- Repuest:
+```json
+{
+    "email": "usuario@ejemplo.com",
+    "password": "Password1!"
+}
+```
+
+Response:
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+### Usuarios
+Todos estos endpoints requieren el token JWT en el header:
+`Authorization: Bearer <token>`
 
 ## Ejemplos:
 1. Crear Usuario
